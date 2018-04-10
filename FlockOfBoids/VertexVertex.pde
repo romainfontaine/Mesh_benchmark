@@ -7,22 +7,27 @@ class VertexVertex extends MeshRepresentation {
     super(scale, rt, retained);
     this.vertexlist_pos = vertexlist_pos;
     this.vertexlist = vertexlist;
-    generateIfRetained();
+    generateShapes();
   }
 
-  protected void generateShape() {
-    p = createShape();
-    HashSet<PVector> facelist = getFaceList();
+  protected void generateShapes() {
+    RenderType save = render_type;
+    for (RenderType r : RenderType.values()) {
+      render_type = r;
+      shapes[r.ordinal()] = createShape();
+      HashSet<PVector> facelist = getFaceList();
 
-    p.beginShape(getKind());
-    applyStyle(p);
-    for (PVector v : facelist) {
-      int[] i = new int[]{(int)v.x, (int)v.y, (int)v.z};
-      for (int k : i)
-        p.vertex(vertexlist_pos[k].x * scale, vertexlist_pos[k].y * scale, vertexlist_pos[k].z * scale);
+      shapes[r.ordinal()].beginShape(getKind());
+      applyStyle(shapes[r.ordinal()]);
+      for (PVector v : facelist) {
+        int[] i = new int[]{(int)v.x, (int)v.y, (int)v.z};
+        for (int k : i)
+          shapes[r.ordinal()].vertex(vertexlist_pos[k].x * scale, vertexlist_pos[k].y * scale, vertexlist_pos[k].z * scale);
+      }
+
+      shapes[r.ordinal()].endShape();
     }
-
-    p.endShape();
+    render_type = save;
   }
 
   private HashSet<PVector> getFaceList() {
@@ -42,7 +47,7 @@ class VertexVertex extends MeshRepresentation {
   public void render() {
     //print("VV"+retained+"\n");
     if (retained) {
-      shape(p, 0, 0);
+      shape(shapes[render_type.ordinal()], 0, 0);
     } else {
       HashSet<PVector> facelist = getFaceList();
       beginShape(TRIANGLES);

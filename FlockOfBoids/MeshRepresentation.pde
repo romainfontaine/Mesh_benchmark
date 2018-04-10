@@ -4,33 +4,27 @@ enum RenderType {
 
 abstract class MeshRepresentation {
   protected RenderType render_type;
-  protected PShape p;
+  protected PShape[] shapes;
   protected int scale;
   protected Boolean retained;
-  protected abstract void generateShape();
+  protected abstract void generateShapes();
   abstract void render();
 
   protected MeshRepresentation(int scale, RenderType rt, Boolean retained) {
     this.scale = scale;
     this.retained = retained;
+    this.shapes = new PShape[RenderType.values().length];
     render_type = rt;
-  }
-
-  protected void generateIfRetained() {
-    if (retained) {
-      generateShape();
-    }
   }
 
   protected void setRetained(Boolean r) {
     this.retained = r;
-    generateIfRetained();
   }
 
   protected void setRenderType(RenderType rt) {
     render_type=rt;
-    generateIfRetained();
   }
+  
   protected void setRenderType(int rt) {
     setRenderType(RenderType.values()[rt]);
   }

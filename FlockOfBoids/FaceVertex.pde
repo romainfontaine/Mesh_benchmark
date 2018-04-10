@@ -18,23 +18,28 @@ class FaceVertex extends MeshRepresentation {
       }
       vertexlist_faces.add(a);
     }
-    generateIfRetained();
+    generateShapes();
   }
 
-  protected void generateShape() {
-    p = createShape();
-    p.beginShape(getKind());
-    applyStyle(p);
-    for (int j = 0; j<facelist.length; j++) 
-      for (int k = 0; k<3; k++)
-        p.vertex(vertexlist_pos[facelist[j][k]].x * scale, vertexlist_pos[facelist[j][k]].y * scale, vertexlist_pos[facelist[j][k]].z * scale);
-    p.endShape();
+  protected void generateShapes() {
+    RenderType save = render_type;
+    for (RenderType r : RenderType.values()) {
+      render_type = r;
+      shapes[r.ordinal()] = createShape();
+      shapes[r.ordinal()].beginShape(getKind());
+      applyStyle(shapes[r.ordinal()]);
+      for (int j = 0; j<facelist.length; j++) 
+        for (int k = 0; k<3; k++)
+          shapes[r.ordinal()].vertex(vertexlist_pos[facelist[j][k]].x * scale, vertexlist_pos[facelist[j][k]].y * scale, vertexlist_pos[facelist[j][k]].z * scale);
+      shapes[r.ordinal()].endShape();
+    }
+    render_type = save;
   }
 
   public void render() {
     //print("FV"+retained+"\n");
     if (retained) {
-      shape(p, 0, 0);
+      shape(shapes[render_type.ordinal()], 0, 0);
     } else {
       beginShape(TRIANGLES);
       for (int j = 0; j<facelist.length; j++) 

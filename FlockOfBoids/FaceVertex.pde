@@ -41,7 +41,7 @@ class FaceVertex extends MeshRepresentation {
     if (retained) {
       shape(shapes[render_type.ordinal()], 0, 0);
     } else {
-      beginShape(TRIANGLES);
+      beginShape(getKind());
       for (int j = 0; j<facelist.length; j++) 
         for (int k = 0; k<3; k++)
           vertex(vertexlist_pos[facelist[j][k]].x * scale, vertexlist_pos[facelist[j][k]].y * scale, vertexlist_pos[facelist[j][k]].z * scale);

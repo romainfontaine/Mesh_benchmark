@@ -50,7 +50,7 @@ class VertexVertex extends MeshRepresentation {
       shape(shapes[render_type.ordinal()], 0, 0);
     } else {
       HashSet<PVector> facelist = getFaceList();
-      beginShape(TRIANGLES);
+      beginShape(getKind());
       for (PVector v : facelist) {
         int[] i = new int[]{(int)v.x, (int)v.y, (int)v.z};
         for (int k : i)

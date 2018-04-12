@@ -40,7 +40,7 @@ int mode;
 // 0. Vertex Vertex
 // 1. Face Vertex
 int repr = 0;
-
+Interpolator eyeInterpolator;
 MeshRepresentation[] mrs;
 String[] txt_mrs = new String[]{"Vertex Vertex", "Face Vertex"};
 
@@ -113,6 +113,9 @@ void setup() {
   Eye eye = new Eye(scene);
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
+
+  eyeInterpolator = new Interpolator(eye);
+
   //interactivity defaults to the eye
   scene.setDefaultGrabber(eye);
   scene.fitBall();
@@ -130,7 +133,7 @@ class FPSStats {
   int fps_max;
   public FPSStats()
   { 
-    this(1000); //10 secs @ 100fps
+    this(500); //5 secs @ 100fps
   }
   public FPSStats(int fps_max) { 
     this.fps_max = fps_max;
@@ -143,14 +146,12 @@ class FPSStats {
 
     this.fps_count++;
     this.fps_count = this.fps_count>fps_max?fps_max:this.fps_count;
-    render();
   }
-  public void render() {
-
+  public void render(int ox, int oy, int w, int h) {
     pushStyle();
     stroke(#FFFFFF);
-    line(100, 100, 0, 100, 600, 0);
-    line(100, 600, 0, 1100, 600, 0);
+    line(ox, oy, 0, ox, oy+h, 0);
+    line(ox, oy+h, 0, ox+w, oy+h, 0);
     stroke(#FFA400);
 
     int step = 5;
@@ -166,8 +167,8 @@ class FPSStats {
         count++;
       }
       avg = sum/count;
-      int y = 600 - (int)(500*(avg/100));
-      int x = 100+i;
+      int y = (h+oy) - (int)(h*(avg/100));
+      int x = ox+(int)((((float)i)/fps_max)*w);
       if (i == 0) {
         line(x, y, 0, x, y, 0);
       } else {
@@ -178,13 +179,13 @@ class FPSStats {
     }
     global_avg/=fps_count;
 
-    textSize(32);
+    textSize(h/10);
     textAlign(RIGHT);
-    text("100", 90, 100, 0);
-    text(str((int)avg), 90, 600-avg/100*500);
-    text("0", 90, 600, 0);
-    textAlign(LEFT);
-    text(str(global_avg), 90, 700);
+    text("100", ox, oy, 0);
+    text(str((int)avg), ox, (oy+h)-avg/100*h);
+    text("0", ox, oy+h, 0);
+    textAlign(CENTER);
+    text("Average FPS: "+nf(global_avg,2,2), ox+w/2, oy);
 
     popStyle();
   }
@@ -201,10 +202,16 @@ void draw() {
   // Calls Node.visit() on all scene nodes.
   scene.traverse();
   s.add((int)frameRate);
-  text(txt_mrs[repr], 300, 700);
-  text(retained?"Retained":"Immediate", 600, 700);
-  text(RenderType.values()[mode].name(), 900, 700);
-  text(n_visible_birds, 1200, 700);
+
+  scene.beginScreenCoordinates();
+  s.render(50, 50, 300, 150);
+  textSize(15);
+  text(txt_mrs[repr], 50, 25);
+  text(retained?"Retained":"Immediate", 300, 25);
+  text(RenderType.values()[mode].name(), 500, 25);
+  text("Visible birds: "+n_visible_birds, 800, 25);
+
+  scene.endScreenCoordinates();
 }
 
 void walls() {
@@ -231,6 +238,15 @@ void walls() {
 
 void keyPressed() {
   switch (key) {
+  case '1':
+    eyeInterpolator.addKeyFrame(scene.eye().get());
+    break;
+  case 'b':
+    eyeInterpolator.toggle();
+    break;
+  case 'n':
+    eyeInterpolator.clear();
+    break;
   case 'a':
     animate = !animate;
     break;

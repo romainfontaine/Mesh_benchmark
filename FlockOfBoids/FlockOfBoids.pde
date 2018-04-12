@@ -53,7 +53,7 @@ boolean retained = false;
 FaceVertex fv;
 VertexVertex vv;
 int scale = 3;
-
+int n_visible_birds = 0;
 void setup() {
   int[][] facelist = new int[][]{
     {0, 1, 2}, 
@@ -108,6 +108,7 @@ void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
   scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+  scene.enableBoundaryEquations();
   scene.setAnchor(scene.center());
   Eye eye = new Eye(scene);
   scene.setEye(eye);
@@ -196,12 +197,14 @@ void draw() {
   ambientLight(128, 128, 128);
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
+  n_visible_birds=0;
   // Calls Node.visit() on all scene nodes.
   scene.traverse();
   s.add((int)frameRate);
   text(txt_mrs[repr], 300, 700);
   text(retained?"Retained":"Immediate", 600, 700);
   text(RenderType.values()[mode].name(), 900, 700);
+  text(n_visible_birds, 1200, 700);
 }
 
 void walls() {

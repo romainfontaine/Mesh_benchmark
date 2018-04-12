@@ -30,7 +30,12 @@ class Boid {
         public void visit() {
         if (animate)
           run(flock);
-        render();
+        // The size of the bird with scale 3 is 18, 12, 6. Create the box around the center by divinding by 2.
+        Graph.Visibility v = scene.boxVisibility(Vector.add(position, new Vector(9, 6, 3)), Vector.add(position, new Vector(-9, -6, -3)));
+        if (v==Graph.Visibility.VISIBLE || v==Graph.Visibility.SEMIVISIBLE){
+          render();
+          n_visible_birds++;
+        }
       }
 
       // Behaviour: tapping over a boid will select the node as

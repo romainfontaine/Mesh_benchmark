@@ -22,6 +22,23 @@ import frames.primitives.*;
 import frames.core.*;
 import frames.processing.*;
 
+float[][]path={{640.0, 360.0, 1886.4425, 0.0, 0.0, 0.0, 1.0}, 
+  {640.0, 360.0, 869.2525, 0.0, 0.0, 0.0, 1.0}, 
+  {640.0, 360.0, 418.4834, 0.0, 0.0, 0.0, 1.0}, 
+  {468.41962, 320.15305, 424.23468, 0.12102556, -0.44434473, -0.033873517, 0.88699675}, 
+  {203.92859, 268.38782, 222.9343, 0.1787218, -0.7437343, -0.018492391, 0.6438757}, 
+  {394.8198, 262.49805, -67.24667, 0.22092962, -0.92582506, 0.04403913, 0.3034776}, 
+  {682.9353, 283.46027, -143.60818, 0.22967799, -0.9683609, 0.093807235, -0.026934996}, 
+  {921.96533, 245.15018, -34.35785, 0.19770028, -0.91131204, 0.20371269, -0.29820484}, 
+  {1066.9586, 211.62221, 286.56213, 0.12176818, -0.7069967, 0.33661538, -0.609933}, 
+  {1892.4865, -74.58904, 260.9125, 0.12176818, -0.7069967, 0.33661538, -0.609933}, 
+  {2148.1897, -163.24153, 252.9677, 0.12176818, -0.7069967, 0.33661538, -0.609933}, 
+  {583.9621, 300.7055, 1894.9838, -0.023416907, 0.010086668, 0.3470658, -0.93749416}, 
+  {-877.09973, 314.99332, 797.00757, -0.15797931, 0.56527406, 0.19487377, -0.7858321}, 
+};
+
+boolean benchmark = true;
+boolean viewFrustumCulling = true;
 Scene scene;
 int flockWidth = 1280;
 int flockHeight = 720;
@@ -34,27 +51,46 @@ boolean avoidWalls = true;
 // 2. Only faces
 // 3. Only points
 int mode;
-
-
 // Mesh Representation
 // 0. Vertex Vertex
 // 1. Face Vertex
 int repr = 0;
+boolean retained = false;
+
+ArrayList<BenchmarkInstance> benches = new ArrayList<BenchmarkInstance>();
+
 Interpolator eyeInterpolator;
 MeshRepresentation[] mrs;
 String[] txt_mrs = new String[]{"Vertex Vertex", "Face Vertex"};
 
 int initBoidNum = 900; // amount of boids to start the program with
-ArrayList<Boid> flock;
+ArrayList<Boid> flock = new ArrayList();
 Node avatar;
 boolean animate = true;
 
-boolean retained = false;
 FaceVertex fv;
 VertexVertex vv;
 int scale = 3;
 int n_visible_birds = 0;
+FPSStats fps;
+
+void initBoids() {
+  // create and fill the list of boids
+  for (int i = 0; i < initBoidNum; i++)
+    flock.get(i).init(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2));
+}
+
+int bench_it = 0;
 void setup() {
+  for (int repr = 0; repr<2; repr++) {
+    for (int rend = 0; rend<4; rend++) {
+      benches.add(new BenchmarkInstance(repr, true, rend, true));
+      benches.add(new BenchmarkInstance(repr, true, rend, false));
+      benches.add(new BenchmarkInstance(repr, false, rend, true));
+      benches.add(new BenchmarkInstance(repr, false, rend, false));
+    }
+  }
+
   int[][] facelist = new int[][]{
     {0, 1, 2}, 
     {0, 1, 3}, 
@@ -119,79 +155,21 @@ void setup() {
   //interactivity defaults to the eye
   scene.setDefaultGrabber(eye);
   scene.fitBall();
-  // create and fill the list of boids
-  flock = new ArrayList();
+
   for (int i = 0; i < initBoidNum; i++)
     flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), vv));
-}
 
-class FPSStats {
-  int fps_count = 0;
-
-  int fps_curr_idx = 0;
-  int[] fps;
-  int fps_max;
-  public FPSStats()
-  { 
-    this(500); //5 secs @ 100fps
-  }
-  public FPSStats(int fps_max) { 
-    this.fps_max = fps_max;
-    this.fps = new int[this.fps_max];
-  }
-  public void add(int fps) {
-    this.fps[this.fps_curr_idx]=fps;
-    this.fps_curr_idx++;
-    this.fps_curr_idx%=this.fps_max;
-
-    this.fps_count++;
-    this.fps_count = this.fps_count>fps_max?fps_max:this.fps_count;
-  }
-  public void render(int ox, int oy, int w, int h) {
-    pushStyle();
-    stroke(#FFFFFF);
-    line(ox, oy, 0, ox, oy+h, 0);
-    line(ox, oy+h, 0, ox+w, oy+h, 0);
-    stroke(#FFA400);
-
-    int step = 5;
-    int prevx = 0, prevy=0;
-    float avg = 0;
-    float global_avg = 0;
-    for (int i = 0; i<fps_count; i+=step) {
-      int count = 0;
-      int sum = 0;
-      for (int j = i; j<i+step && j<fps_count; j++) {
-        sum+=fps[j];
-        global_avg+=fps[j];
-        count++;
-      }
-      avg = sum/count;
-      int y = (h+oy) - (int)(h*(avg/100));
-      int x = ox+(int)((((float)i)/fps_max)*w);
-      if (i == 0) {
-        line(x, y, 0, x, y, 0);
-      } else {
-        line(prevx, prevy, 0, x, y, 0);
-      }
-      prevx = x;
-      prevy = y;
+  if (benchmark) {
+    for (float[] d : path) {
+      eyeInterpolator.addKeyFrame(new Frame(new Vector(d[0], d[1], d[2]), new Quaternion(d[3], d[4], d[5], d[6])));
     }
-    global_avg/=fps_count;
-
-    textSize(h/10);
-    textAlign(RIGHT);
-    text("100", ox, oy, 0);
-    text(str((int)avg), ox, (oy+h)-avg/100*h);
-    text("0", ox, oy+h, 0);
-    textAlign(CENTER);
-    text("Average FPS: "+nf(global_avg,2,2), ox+w/2, oy);
-
-    popStyle();
+    eyeInterpolator.start();
+    benches.get(0).apply();
+    print("MeshRepresentation\tRenderMode\tRetained\tViewFrustumCulling\tAverageFPS\n");
   }
+  fps = new FPSStats();
 }
 
-FPSStats s = new FPSStats();
 
 void draw() {
   background(color(10, 50, 25));
@@ -201,10 +179,11 @@ void draw() {
   n_visible_birds=0;
   // Calls Node.visit() on all scene nodes.
   scene.traverse();
-  s.add((int)frameRate);
+
+  fps.add((int)frameRate);
 
   scene.beginScreenCoordinates();
-  s.render(50, 50, 300, 150);
+  fps.render(50, 50, 300, 150);
   textSize(15);
   text(txt_mrs[repr], 50, 25);
   text(retained?"Retained":"Immediate", 300, 25);
@@ -212,6 +191,20 @@ void draw() {
   text("Visible birds: "+n_visible_birds, 800, 25);
 
   scene.endScreenCoordinates();
+  if (benchmark) {
+    benches.get(bench_it).add(frameRate);
+    if (!eyeInterpolator.started()) {
+      print(benches.get(bench_it)+"\n");
+      bench_it++;
+      if (bench_it>=benches.size()) {
+        benchmark = false;
+      } else {
+        benches.get(bench_it).apply();
+        initBoids();
+        eyeInterpolator.start();
+      }
+    }
+  }
 }
 
 void walls() {
@@ -237,8 +230,11 @@ void walls() {
 }
 
 void keyPressed() {
+  if (benchmark)
+    return;
   switch (key) {
   case '1':
+    //print(a.position(),a.orientation().x(), a.orientation().y(), a.orientation().z(), a.orientation().w(), "\n");
     eyeInterpolator.addKeyFrame(scene.eye().get());
     break;
   case 'b':

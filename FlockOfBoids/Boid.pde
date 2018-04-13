@@ -19,10 +19,6 @@ class Boid {
   }
 
   Boid(Vector inPos, MeshRepresentation m_repr) {
-    grabsMouseColor = color(0, 0, 255);
-    avatarColor = color(255, 255, 0);
-    position = new Vector();
-    position.set(inPos);
     node = new Node(scene) {
       // Note that within visit() geometry is defined at the
       // node local coordinate system.
@@ -30,9 +26,14 @@ class Boid {
         public void visit() {
         if (animate)
           run(flock);
-        // The size of the bird with scale 3 is 18, 12, 6. Create the box around the center by divinding by 2.
-        Graph.Visibility v = scene.boxVisibility(Vector.add(position, new Vector(9, 6, 3)), Vector.add(position, new Vector(-9, -6, -3)));
-        if (v==Graph.Visibility.VISIBLE || v==Graph.Visibility.SEMIVISIBLE){
+        if (viewFrustumCulling) {
+          // The size of the bird with scale 3 is 18, 12, 6. Create the box around the center by divinding by 2.
+          Graph.Visibility v = scene.boxVisibility(Vector.add(position, new Vector(9, 6, 3)), Vector.add(position, new Vector(-9, -6, -3)));
+          if (v==Graph.Visibility.VISIBLE || v==Graph.Visibility.SEMIVISIBLE) {
+            render();
+            n_visible_birds++;
+          }
+        } else {
           render();
           n_visible_birds++;
         }
@@ -49,12 +50,21 @@ class Boid {
         }
       }
     };
+    grabsMouseColor = color(0, 0, 255);
+    avatarColor = color(255, 255, 0);
+    position = new Vector();
+    init(inPos);
+    this.m_repr = m_repr;
+  }
+
+  void init(Vector inPos) {
+    position.set(inPos);
     node.setPosition(position);
     velocity = new Vector(random(-1, 1), random(-1, 1), random(1, -1));
     acceleration = new Vector();
     neighborhoodRadius = 100;
-    this.m_repr = m_repr;
   }
+
 
   void run(ArrayList<Boid> boids) {
     t += .1;

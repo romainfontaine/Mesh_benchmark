@@ -47,14 +47,15 @@ Complete la tabla:
 
 Comparativo del desempeño, variando las representationes, los modos y las tecnicas de rendering.
 El promedio de FPS se midió sobre un trayecto interpolado del ojo, con la malla del Boid dada en el ejemplo.
-Medido en una maquina Intel Core I5-5200U, Intel HD Graphics 5500, 8GB RAM.
+
 
 - La representation Face-Vertex es mas rapida porque tiene las faces estan representadas de una manera explicita.
 - El modo retenido es mas lento porque el objeto renderizado es demasiado simple.
 - El View Frustum Culling mejora un poco el desempeño en la mayoria de los casos.
 
-Nota: Para obtener resultados mas interesantes, se podría comparar el desempeno en varias maquinas, con boids de complejidad mayor.
+Nota: Para obtener resultados mas interesantes, se podría comparar el desempeño con boids de complejidad mayor.
 
+Medido en una maquina Intel Core I5-5200U, Intel HD Graphics 5500, 8GB RAM:
 MeshRepresentation|Rendering Mode|Retained|ViewFrustumCulling|Average FPS
 ------------------|--------------|--------|------------------|-----------
 Vertex-Vertex|Faces & Edges|true|true|21.360518
@@ -89,6 +90,43 @@ Face-Vertex|Only Points|true|true|27.740002
 Face-Vertex|Only Points|true|false|26.524441
 Face-Vertex|Only Points|false|true|24.646514
 Face-Vertex|Only Points|false|false|23.769648
+
+
+Medido en una maquina Intel Core I3 3.77GHz, 8GB RAM:
+MeshRepresentation|RenderMode|Retained|ViewFrustumCulling|AverageFPS
+------------------|----------|--------|------------------|----------
+Vertex-Vertex|Faces & Edges|true|true|31,945809
+Vertex-Vertex|Faces & Edges|true|false|29,729801
+Vertex-Vertex|Faces & Edges|false|true|38,207806
+Vertex-Vertex|Faces & Edges|false|false|36,087166
+Vertex-Vertex|Only Edges|true|true|39,150702
+Vertex-Vertex|Only Edges|true|false|38,779029
+Vertex-Vertex|Only Edges|false|true|38,827569
+Vertex-Vertex|Only Edges|false|false|40,316894
+Vertex-Vertex|Only Faces|true|true|38,193070
+Vertex-Vertex|Only Faces|true|false|34,603673
+Vertex-Vertex|Only Faces|false|true|38,267334
+Vertex-Vertex|Only Faces|false|false|40,377155
+Vertex-Vertex|Only Points|true|true|36,794101
+Vertex-Vertex|Only Points|true|false|38,662383
+Vertex-Vertex|Only Points|false|true|32,288518
+Vertex-Vertex|Only Points|false|false|29,274063
+Face-Vertex|Faces & Edges|true|true|34,336980
+Face-Vertex|Faces & Edges|true|false|30,708076
+Face-Vertex|Faces & Edges|false|true|40,371567
+Face-Vertex|Faces & Edges|false|false|36,896587
+Face-Vertex|Only Edges|true|true|38,615692
+Face-Vertex|Only Edges|true|false|37,903409
+Face-Vertex|Only Edges|false|true|41,402560
+Face-Vertex|Only Edges|false|false|39,089708
+Face-Vertex|Only Faces|true|true|35,944432
+Face-Vertex|Only Faces|true|false|35,130075
+Face-Vertex|Only Faces|false|true|42,405147
+Face-Vertex|Only Faces|false|false|43,525593
+Face-Vertex|Only Points|true|true|33,523111
+Face-Vertex|Only Points|true|false|36,476432
+Face-Vertex|Only Points|false|true|30,631610
+Face-Vertex|Only Points|false|false|26,520298
 
 
 ## Entrega

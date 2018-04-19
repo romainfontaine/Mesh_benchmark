@@ -55,7 +55,8 @@ El promedio de FPS se midió sobre un trayecto interpolado del ojo, con la malla
 
 Nota: Para obtener resultados mas interesantes, se podría comparar el desempeño con boids de complejidad mayor.
 
-Medido en una maquina Intel Core I5-5200U, Intel HD Graphics 5500, 8GB RAM:
+Medido en una maquina Intel Core I5-5200U (@2.2 GHz), Intel HD Graphics 5500, 8GB RAM:
+
 MeshRepresentation|Rendering Mode|Retained|ViewFrustumCulling|Average FPS
 ------------------|--------------|--------|------------------|-----------
 Vertex-Vertex|Faces & Edges|true|true|21.360518
@@ -92,7 +93,8 @@ Face-Vertex|Only Points|false|true|24.646514
 Face-Vertex|Only Points|false|false|23.769648
 
 
-Medido en una maquina Intel Core I3 3.77GHz, 8GB RAM:
+Medido en una maquina Intel Core i3 (@3.77GHz), 8GB RAM:
+
 MeshRepresentation|RenderMode|Retained|ViewFrustumCulling|AverageFPS
 ------------------|----------|--------|------------------|----------
 Vertex-Vertex|Faces & Edges|true|true|31,945809
